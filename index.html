@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma Educativa - Osos de Números</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- MENSAJE DE BIENVENIDA FLOTANTE -->
+    <div id="welcome-banner" class="welcome-banner-overlay" style="display: none;">
+        <h1 id="welcome-big-text" class="welcome-big-text">¡Hola!</h1>
+    </div>
+
+    <!-- PANTALLA DE REGISTRO Y CONFIGURACIÓN -->
+    <div id="start-screen" class="start-screen-container">
+        <div class="welcome-card">
+            <h1 class="platform-title">🐻 Osos Academy 🐼</h1>
+            <p class="subtitle">¡Aprende matemáticas jugando!</p>
+            
+            <div class="input-group">
+                <input type="text" id="player-name" class="input-field" placeholder="Tu Nombre" />
+                <input type="text" id="player-lastname" class="input-field" placeholder="Tu Apellido" />
+            </div>
+
+            <p class="section-label">Escribe tu edad (en años):</p>
+            <div class="input-group">
+                <input type="number" id="player-age-input" class="input-field" placeholder="Ej: 6" min="3" max="99" />
+            </div>
+
+            <p class="section-label">Elige tu Avatar:</p>
+            <div class="avatar-selector">
+                <button type="button" class="avatar-btn selected" onclick="selectAvatar('🐻', this)">🐻</button>
+                <button type="button" class="avatar-btn" onclick="selectAvatar('🐼', this)">🐼</button>
+                <button type="button" class="avatar-btn" onclick="selectAvatar('🐨', this)">🐨</button>
+                <button type="button" class="avatar-btn" onclick="selectAvatar('🦸‍♀️', this)">🦸‍♀️</button>
+            </div>
+
+            <p class="section-label">Elige tu Tablero de Operaciones:</p>
+            <div class="boards-selector">
+                <button type="button" class="board-card-btn selected" onclick="selectTopic('+', this)">
+                    <span class="board-icon">➕</span>
+                    <div><h3>Tablero de Sumas</h3><p>Aprende a sumar con ositos</p></div>
+                </button>
+                <button type="button" class="board-card-btn" onclick="selectTopic('-', this)">
+                    <span class="board-icon">➖</span>
+                    <div><h3>Tablero de Restas</h3><p>Aprende a quitar con diversión</p></div>
+                </button>
+                <button type="button" class="board-card-btn" onclick="selectTopic('x', this)">
+                    <span class="board-icon">✖️</span>
+                    <div><h3>Tablero de Multiplicación</h3><p>Desafía tu mente con tablas</p></div>
+                </button>
+                <button type="button" class="board-card-btn" onclick="selectTopic('mixed', this)">
+                    <span class="board-icon">🎲</span>
+                    <div><h3>Modo Sorpresa</h3><p>¡Una mezcla de todo un poco!</p></div>
+                </button>
+            </div>
+
+            <p class="section-label">Elige tu Mundo:</p>
+            <div class="worlds-selector">
+                <button type="button" class="world-card-btn selected" onclick="selectWorld(20, 'Mundo Fácil (Hasta 20 Niveles)', this)">
+                    <span class="board-icon">🟢</span>
+                    <div><h3>Mundo Fácil</h3><p>Niveles hasta 20</p></div>
+                </button>
+                <button type="button" class="world-card-btn" onclick="selectWorld(40, 'Mundo Intermedio (Hasta 40 Niveles)', this)">
+                    <span class="board-icon">🟡</span>
+                    <div><h3>Mundo Intermedio</h3><p>Niveles hasta 40</p></div>
+                </button>
+                <button type="button" class="world-card-btn" onclick="selectWorld(60, 'Mundo Difícil (Hasta 60 Niveles)', this)">
+                    <span class="board-icon">🔴</span>
+                    <div><h3>Mundo Difícil</h3><p>Niveles hasta 60</p></div>
+                </button>
+            </div>
+
+            <button type="button" class="btn-primary" onclick="initPlatform()">¡ENTRAR AL TABLERO!</button>
+        </div>
+    </div>
+
+    <!-- PLATAFORMA PRINCIPAL -->
+    <div id="platform-screen" class="platform-container" style="display: none;">
+        <header class="top-nav">
+            <div class="nav-left">
+                <button type="button" class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <h2 class="brand-logo">▶ Osos<span>Math</span></h2>
+            </div>
+            
+            <div class="music-player-widget">
+                <span class="music-icon">🎵</span>
+                <span id="music-title" class="music-title">Música Alegre: Pausada</span>
+                <button type="button" id="music-toggle-btn" class="music-btn" onclick="toggleBackgroundMusic()">▶ Reproducir</button>
+            </div>
+
+            <div class="nav-right">
+                <div class="user-profile-badge">
+                    <span id="header-avatar">🐻</span>
+                    <span id="header-username">Jugador</span>
+                </div>
+                <button type="button" class="exit-btn" onclick="returnToHome()" title="Salir">🏠</button>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <aside id="sidebar" class="sidebar">
+                <div class="sidebar-header">
+                    <h3>🗺️ Mapa de Niveles</h3>
+                    <p id="current-board-label">Tablero de Sumas</p>
+                </div>
+                <div class="levels-list" id="levels-container"></div>
+            </aside>
+
+            <main class="content-area">
+                <div class="game-dashboard">
+                    <div class="stats-bar">
+                        <div class="stat-pill">⭐ Puntos: <span id="score">0</span></div>
+                        <div class="stat-pill">❤️ Vidas: <span id="lives">3</span></div>
+                        <div class="stat-pill timer-pill">⏱️ Tiempo: <span id="timer-display">00:00</span></div>
+                        <div class="stat-pill level-indicator">Nivel: <span id="current-level-num">1</span></div>
+                        <button type="button" class="audio-speak-btn" onclick="speakCurrentProblem()" title="Escuchar">🔊</button>
+                    </div>
+
+                    <div id="notification" class="notification-banner"></div>
+                    <div id="hint-box" class="hint-banner">💡 <b>Pista:</b> <span id="hint-text"></span></div>
+
+                    <div class="problem-card">
+                        <div class="bears-display">
+                            <div id="bears-1" class="bear-group"></div>
+                            <div id="operator-symbol" class="operator">+</div>
+                            <div id="bears-2" class="bear-group"></div>
+                        </div>
+                        
+                        <div class="equation" id="equation-container"></div>
+                    </div>
+
+                    <div class="options-grid" id="options-container"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- MODAL DE TIGRE FURIOSO -->
+    <div id="angry-modal" class="angry-modal">
+        <div class="angry-content">
+            <div class="angry-animal">🐯💢</div>
+            <h2>¡Cuidado! ¡El Tigre se ha puesto furioso!</h2>
+            <p>Te has quedado sin vidas en este nivel. ¡Recupera energía y vuelve a intentarlo!</p>
+            <button type="button" class="btn-primary" onclick="retryLevel()">🔄 Reintentar Nivel</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
